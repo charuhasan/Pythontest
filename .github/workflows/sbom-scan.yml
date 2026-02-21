@@ -77,10 +77,9 @@ jobs:
           sbom-artifact-upload: true
           sbom-artifact-match: 'sbom-*.json'
 
-      - name: Submit SBOM to GitHub Insights
-        uses: github/dependency-submission-action@v3
+      - name: Submit SBOM to GitHub Dependency Graph
+        uses: github/dependency-submission-action@v4
         if: github.event_name == 'push'
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          sbom-file: sbom-cyclonedx.json
+          sbom-file: sbom-spdx.json
 
