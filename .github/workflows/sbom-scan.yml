@@ -2,17 +2,14 @@ name: Docker SBOM Scan and Insights
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
     paths:
       - 'Dockerfile'
       - 'requirements.txt'
       - 'app.py'
       - '.github/workflows/sbom-scan.yml'
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'Dockerfile'
       - 'requirements.txt'
@@ -25,6 +22,7 @@ jobs:
       contents: write
       security-events: write
       packages: read
+      id-token: write # Required for some security uploads
 
     steps:
       - name: Checkout repository
@@ -38,48 +36,30 @@ jobs:
         with:
           context: .
           push: false
-          load: true
+          load: true # This makes the image available to Trivy/Syft locally
           tags: python-app:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Run Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.28.0 # Use a fixed version for stability
         with:
           image-ref: python-app:${{ github.sha }}
           format: 'sarif'
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
           category: 'trivy-docker-image'
 
-      - name: Generate SBOM with Syft
+      # Combined SBOM generation and upload
+      - name: Generate and Upload SBOM
         uses: anchore/sbom-action@v0
         with:
           image: python-app:${{ github.sha }}
           format: spdx-json
-          output-file: sbom-spdx.json
-
-      - name: Generate SBOM CycloneDX format
-        uses: anchore/sbom-action@v0
-        with:
-          image: python-app:${{ github.sha }}
-          format: cyclonedx-json
-          output-file: sbom-cyclonedx.json
-
-      - name: Upload SBOM to GitHub Dependency Graph
-        uses: anchore/sbom-action/publish-sbom@v0
-        with:
-          sbom-artifact-upload: true
-          sbom-artifact-match: 'sbom-*.json'
-
-      - name: Submit SBOM to GitHub Dependency Graph
-        uses: github/dependency-submission-action@v4
-        if: github.event_name == 'push'
-        with:
-          sbom-file: sbom-spdx.json
-
+          output-file: sbom.spdx.json
+          dependency-snapshot: true # This replaces the need for the separate submission action
