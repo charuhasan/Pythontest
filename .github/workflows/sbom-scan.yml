@@ -3,17 +3,8 @@ name: Docker SBOM Scan and Insights
 on:
   push:
     branches: [main, develop]
-    paths:
-      - 'Dockerfile'
-      - 'requirements.txt'
-      - 'app.py'
-      - '.github/workflows/sbom-scan.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'Dockerfile'
-      - 'requirements.txt'
-      - 'app.py'
 
 jobs:
   sbom-scan:
@@ -22,7 +13,7 @@ jobs:
       contents: write
       security-events: write
       packages: read
-      id-token: write # Required for some security uploads
+      id-token: write 
 
     steps:
       - name: Checkout repository
@@ -35,31 +26,14 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: false
-          load: true # This makes the image available to Trivy/Syft locally
+          load: true 
           tags: python-app:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
-      - name: Run Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.28.0 # Use a fixed version for stability
-        with:
-          image-ref: python-app:${{ github.sha }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: 'trivy-results.sarif'
-          category: 'trivy-docker-image'
-
-      # Combined SBOM generation and upload
-      - name: Generate and Upload SBOM
+      - name: Generate and Submit SBOM
         uses: anchore/sbom-action@v0
         with:
           image: python-app:${{ github.sha }}
           format: spdx-json
           output-file: sbom.spdx.json
-          dependency-snapshot: true # This replaces the need for the separate submission action
+          # This specific flag sends the data to GitHub Insights -> Dependency Graph
+          dependency-snapshot: true
