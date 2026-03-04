@@ -37,5 +37,9 @@ jobs:
           format: spdx-json
           output-file: sbom.spdx.json
           # This specific flag sends the data to GitHub Insights -> Dependency Graph
-          dependency-snapshot: true
+          dependency-snapshot: flase
+      - name: Submit SBOM to Dependency Graph 
+        uses: advanced-security/sbom-upload-action@v1.1
+        with: 
+         sbom-path: sbom.spdx.json
        
