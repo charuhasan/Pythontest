@@ -37,9 +37,14 @@ jobs:
           format: spdx-json
           output-file: sbom.spdx.json
           # This specific flag sends the data to GitHub Insights -> Dependency Graph
-          dependency-snapshot: true
-      # - name: Submit SBOM to Dependency Graph 
-      #   uses: advanced-security/sbom-upload-action@v1.1
-      #   with: 
-      #    sbom-path: sbom.spdx.json
-       
+          dependency-snapshot: false
+      - name: Generate and Submit SBOM to Dependency Graph
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'image'
+          image-ref: 'python-app:${{ github.sha }}'
+          # 'github' format formats the output specifically for the Dependency API
+          format: 'github'
+          output: 'dependency-results.sbom.json'
+          # Passing the token triggers the automatic upload to the Dependency tree
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
