@@ -39,7 +39,7 @@ jobs:
       #     # This specific flag sends the data to GitHub Insights -> Dependency Graph
       #     dependency-snapshot: false
       - name: Generate and Submit SBOM to Dependency Graph
-        uses: aquasecurity/trivy-action@0
+        uses: aquasecurity/trivy-action@0.34.2
         with:
           scan-type: 'image'
           image-ref: 'python-app:${{ github.sha }}'
