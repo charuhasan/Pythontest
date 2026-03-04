@@ -48,3 +48,8 @@ jobs:
           output: 'dependency-results.sbom.json'
           # Passing the token triggers the automatic upload to the Dependency tree
           github-pat: ${{ secrets.GITHUB_TOKEN }}
+          exit-code: '1' 
+          # Highly recommended: Only fail if a fix is actually available
+          ignore-unfixed: true 
+          # Define what severity levels will break the build
+          severity: 'CRITICAL,HIGH'
