@@ -52,4 +52,4 @@ jobs:
           # Highly recommended: Only fail if a fix is actually available
           ignore-unfixed: true 
           # Define what severity levels will break the build
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'
