@@ -30,16 +30,16 @@ jobs:
           load: true 
           tags: python-app:${{ github.sha }}
 
-      - name: Generate and Submit SBOM
-        uses: anchore/sbom-action@v0
-        with:
-          image: python-app:${{ github.sha }}
-          format: spdx-json
-          output-file: sbom.spdx.json
-          # This specific flag sends the data to GitHub Insights -> Dependency Graph
-          dependency-snapshot: false
+      # - name: Generate and Submit SBOM
+      #   uses: anchore/sbom-action@v0
+      #   with:
+      #     image: python-app:${{ github.sha }}
+      #     format: spdx-json
+      #     output-file: sbom.spdx.json
+      #     # This specific flag sends the data to GitHub Insights -> Dependency Graph
+      #     dependency-snapshot: false
       - name: Generate and Submit SBOM to Dependency Graph
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0
         with:
           scan-type: 'image'
           image-ref: 'python-app:${{ github.sha }}'
